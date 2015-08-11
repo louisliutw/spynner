@@ -1056,12 +1056,12 @@ class Browser(object):
 
     def close(self):
         """Close Browser instance and release resources."""
-        if self.manager:
-            del self.manager
-        if self.webpage:
-            del self.webpage
         if self.webview:
             self.destroy_webview()
+        if self.webpage:
+            del self.webpage
+        if self.manager:
+            del self.manager
         self.application.exit()
 
     def search_element_text(self, search_text, element='a', case_sensitive=False, match_exactly=True):
