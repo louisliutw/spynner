@@ -453,16 +453,21 @@ class Browser(object):
             _debug(*args, **kwargs)
 
     def get_js_obj_length(self, res):
-        if res.type() != res.Map:
-            return False
-        resmap = res.toMap()
-        lenfield = QString(u'length')
-        if lenfield not in resmap:
-            return False
-        if resmap[lenfield].type() == resmap[lenfield].Double:
-            return int(resmap[lenfield].toDouble()[0])
+        if HAS_PYSIDE:
+            if not res:
+                return False
+            return int(res['length'])
         else:
-            return resmap[lenfield].toInt()[0]
+            if res.type() != res.Map:
+                return False
+            resmap = res.toMap()
+            lenfield = QString(u'length')
+            if lenfield not in resmap:
+                return False
+            if resmap[lenfield].type() == resmap[lenfield].Double:
+                return int(resmap[lenfield].toDouble()[0])
+            else:
+                return resmap[lenfield].toInt()[0]
 
     def jslen(self, selector):
         res = self.runjs("%s('%s')" % (self.jslib, selector))
@@ -1319,15 +1324,11 @@ class Browser(object):
         #returning "TypeError: Type error" - BUT it looks like the JS does complete after
         #the function has already returned
         res = self.webframe.evaluateJavaScript(jscode)
-        try:
+        if not HAS_PYSIDE:
             js_has_runned_successfully = res.isValid() or res.isNull()
             if not js_has_runned_successfully:
                 # try another time
                 res = self.webframe.evaluateJavaScript(jscode)
-        except:
-            # pyside
-            if not HAS_PYSIDE:
-                raise
         return res
 
     def set_javascript_confirm_callback(self, callback):
