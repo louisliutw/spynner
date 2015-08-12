@@ -208,7 +208,7 @@ class Browser(object):
         wp.javaScriptConfirm = self._javascript_confirm
         wp.javaScriptPrompt = self._javascript_prompt
         self._javascript_confirm_callback = None
-        self._javascript_confirm_prompt = None
+        self._javascript_prompt_callback = None
         """PyQt4.QtNetwork.QNetworkCookieJar object."""
         self.cookies = []
         mngr.sslErrors.connect(self._on_manager_ssl_errors)
@@ -335,7 +335,7 @@ class Browser(object):
             return value
         return QWebPage.javaScriptConfirm(self.webpage, webframe, message)
 
-    def _javascript_prompt(self, webframe, message, defaultvalue, result):
+    def _javascript_prompt(self, webframe, message = None, defaultvalue = None):
         url = webframe.url()
         smessage = six.u(message)
         self._debug(INFO, "Javascript prompt (webframe url = %s): %s" %
@@ -345,11 +345,14 @@ class Browser(object):
             self._debug(INFO, "Javascript prompt callback returned: %s" % value)
             if value in (False, None):
                 return False
-            result.clear()
-            result.append(value)
-            return True
+            if HAS_PYSIDE:
+                return True, value
+            else:
+                result = QString()
+                result.append(value)
+                return True, result
         return QWebPage.javaScriptPrompt(self.webpage, webframe, message,
-            defaultvalue, result)
+            defaultvalue)
 
     def _on_webview_destroyed(self, window):
         self.webview = None
