@@ -1640,7 +1640,7 @@ class ExtendedNetworkCookieJar(QNetworkCookieJar):
         def str2bool(value):
             return {"TRUE": True, "FALSE": False}[value]
         def get_cookie(line):
-            fields = map(str.strip, line.split("\t"))
+            fields = list(map(str.strip, line.split("\t")))
             if len(fields) != 7:
                 return
             domain, domain_flag, path, is_secure, expiration, name, value = fields
@@ -1652,7 +1652,7 @@ class ExtendedNetworkCookieJar(QNetworkCookieJar):
             return cookie
         cookies = [get_cookie(line) for line in string_cookies.splitlines()
           if line.strip() and not line.strip().startswith("#")]
-        self.setAllCookies(filter(bool, cookies))
+        self.setAllCookies(list(filter(bool, cookies)))
 
     def cookiesForUrl(self, qurl):
         cookies = QNetworkCookieJar.cookiesForUrl(self, qurl)
